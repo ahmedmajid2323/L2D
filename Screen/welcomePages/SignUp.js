@@ -1,8 +1,30 @@
-import { StyleSheet, Text, View,Image, TextInput, Pressable, } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, View,Image, TextInput, Pressable, TouchableOpacity, Alert} from 'react-native'
+import React, { useState } from 'react'
 import LinearGradient from 'react-native-linear-gradient'
 
 const SignUp = ({navigation}) => {
+
+    const [Next_step, setNext_step] = useState(false)
+    const [userCredentiels, setuserCredentiels] = useState({
+        email:'',
+        full_name:'',
+        address:'',
+        phone:'',
+        password: '',
+    })
+    const [PasswordConfirmation, setPasswordConfirmation] = useState()
+
+    const handleSubmission = ()=>{
+        if (PasswordConfirmation !== userCredentiels.password) {
+            Alert.alert('Warning' , 'please confirm the same password !')
+        } else if (!userCredentiels.full_name.trim() || !userCredentiels.address.trim() || !userCredentiels.phone.trim()
+            || !userCredentiels.password.trim() || !userCredentiels.email.trim() ) {
+                Alert.alert('alert' , 'All fields are required !')
+        }else{
+            console.log('submitted')
+        } 
+    }
+
   return (
     <LinearGradient 
     colors={['#000B14', '#020F19', '#051622', '#09202F', '#11324A', '#153A54']}
@@ -15,25 +37,69 @@ const SignUp = ({navigation}) => {
             <Text style={{color:'#FFFBFB',opacity:0.5}}>Create your account, it takes less than a minute</Text>
         </View>
         <View style={styles.form}>
-            <View>
-                <Text style={styles.text}>Full name </Text>
-                <TextInput style={styles.input} />
-            </View>
-            <View>
-                <Text style={styles.text}>Email </Text>
-                <TextInput style={styles.input} />
-            </View>
-            <View>
-                <Text style={styles.text}>Password </Text>
-                <TextInput style={styles.input} />
-            </View>
-            <View>
-                <Text style={styles.text}>Confirm Password </Text>
-                <TextInput style={styles.input} />
-            </View>
-            <Pressable style={styles.button}>
-                <Text style={{color:'white',textAlign:'center'}}>SignUp</Text>
-            </Pressable>
+            {
+                !Next_step ? (
+                    <>
+                    <View>
+                        <Text style={styles.text}>Full name : </Text>
+                        <TextInput value={userCredentiels?.full_name}
+                        onChangeText={(text)=>setuserCredentiels(prev=>({...prev, full_name: text}))}
+                        style={styles.input} />
+                    </View>
+                    <View>
+                        <Text style={styles.text}>Address : </Text>
+                        <TextInput value={userCredentiels?.adress}
+                        onChangeText={(text)=>setuserCredentiels(prev=>({...prev, address: text}))}
+                        style={styles.input} />
+                    </View>
+                    <View>
+                        <Text style={styles.text}>phone number : </Text>
+                        <TextInput value={userCredentiels?.phone}
+                        onChangeText={(text)=>setuserCredentiels(prev=>({...prev, phone: text}))}
+                        style={styles.input} />
+                    </View>
+                    <View style={{flexDirection:'row' , gap:10,justifyContent:'center',alignItems:'center'}} >
+                        <View style={{width:10 , height:10 , borderRadius:50 , backgroundColor:'red',elevation:10}} />
+                        <View style={{width:10 , height:10 , borderRadius:50 , backgroundColor:'white',elevation:10}} />
+                    </View>
+                    <TouchableOpacity onPress={()=>setNext_step(true)}
+                    style={styles.button}>
+                        <Text style={{color:'white',textAlign:'center'}}>Next</Text>
+                    </TouchableOpacity>
+                    </>
+                )
+                :(
+                    <>
+                    <View>
+                        <Text style={styles.text}>Email : </Text>
+                        <TextInput value={userCredentiels?.email}
+                        onChangeText={(text)=>setuserCredentiels(prev=>({...prev, email: text}))}
+                        style={styles.input} />
+                    </View>
+                    <View>
+                        <Text style={styles.text}>Password : </Text>
+                        <TextInput value={userCredentiels?.password} secureTextEntry 
+                        onChangeText={(text)=>setuserCredentiels(prev=>({...prev, password: text}))}
+                        style={styles.input} />
+                    </View>
+                    <View>
+                        <Text style={styles.text}>Confirm Password : </Text>
+                        <TextInput value={PasswordConfirmation} secureTextEntry
+                        onChangeText={(text)=>setPasswordConfirmation(text)}
+                        style={styles.input} />
+                    </View>
+                    <View style={{flexDirection:'row' , gap:10 ,justifyContent:'center',alignItems:'center'}} >
+                        <View style={{width:10 , height:10 , borderRadius:50 , backgroundColor:'white',elevation:10}} />
+                        <View style={{width:10 , height:10 , borderRadius:50 , backgroundColor:'red',elevation:10}} />
+                    </View>
+                    <TouchableOpacity onPress={handleSubmission}
+                    style={styles.button}>
+                        <Text style={{color:'white',textAlign:'center'}}>Submit</Text>
+                    </TouchableOpacity>
+                </>
+                )
+            }
+            
         </View>
         <View style={{flexDirection:'row',alignItems:'center',justifyContent:'center'}}>
             <Text style={{textAlign:'center',color:'white',marginVertical:20,fontSize:20}}>Already have an account ? </Text>

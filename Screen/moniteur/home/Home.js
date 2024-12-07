@@ -1,5 +1,6 @@
 import { Image, Pressable, ScrollView, StyleSheet, Text, View , TextInput } from 'react-native'
 import React from 'react'
+import Icon from 'react-native-vector-icons/Feather'
 import LinearGradient from 'react-native-linear-gradient'
 
 const Home = ({navigation}) => {
@@ -14,7 +15,7 @@ const Home = ({navigation}) => {
     ]
 
   return (
-    <LinearGradient 
+    <LinearGradient
     colors={['#000B14', '#020F19', '#051622', '#09202F', '#11324A', '#153A54']}
     style={styles.screen}>
 
@@ -30,7 +31,7 @@ const Home = ({navigation}) => {
 
         <View style={{flexDirection:'row', alignItems:'center',marginTop:20}}>
             <TextInput style={{backgroundColor:'white',borderRadius:50,padding:10,zIndex:0,width:'100%',paddingHorizontal:20}} placeholder='search clients here...'/>
-            <Image style={{position:'relative',left:-35,zIndex:1}} source={require('../../../assets/icon_search.png')} />
+            <Icon name='search' color='black' size={20} style={{position:'relative',left:-40,zIndex:1}} />
         </View>
 
         <ScrollView style={{flexDirection:'column',gap:20,marginTop:20}}>
@@ -45,13 +46,13 @@ const Home = ({navigation}) => {
                             <View style={{flexDirection:'row',gap:20,alignItems:'center',justifyContent:'flex-end',marginRight:10}}>
                             <Pressable /* onPress={()=>handleCall(mentor.phone_num)} */
                                 style={{flexDirection:'row',alignItems:'center',gap:10}}>
-                                <Image style={{width:20,height:20}} source={require('../../../assets/icons/phone.png')}/> 
+                                <Icon name='phone' color='white' size={20} />
                                 <Text style={{color:'white'}}>call</Text>
                             </Pressable>
                             {/*** use redux to pass the client willing to talk to ****/}
                             <Pressable onPress={()=>navigation.navigate('chat')}
                                 style={{flexDirection:'row',alignItems:'center',gap:10}}>
-                                <Image source={require('../../../assets/icons/message.png')}/>
+                                <Icon name='message-square' color='white' size={20} />
                                 <Text style={{color:'white'}}>message</Text>
                             </Pressable>
                             </View>

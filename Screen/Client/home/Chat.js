@@ -13,6 +13,7 @@ import {
   } from 'react-native';
   import React, { useState } from 'react';
   import LinearGradient from 'react-native-linear-gradient';
+  import Icon from 'react-native-vector-icons/Feather'
   
   const Chat_client = ({ navigation }) => {
     const [clientMsg, setClientMsg] = useState('');
@@ -88,9 +89,7 @@ import {
                   style={styles.input} 
                   placeholder="Type your text here.." />
                 <Pressable onPress={sendMessage} style={styles.sendButton}>
-                  <Image 
-                    style={styles.sendIcon} 
-                    source={require('../../../assets/icons/send.png')} />
+                  <Icon name='send' color='black' size={20} />
                 </Pressable>
               </View>
             </View>
@@ -170,10 +169,6 @@ import {
       justifyContent: 'center',
       padding: 10,
       borderRadius: 50,
-    },
-    sendIcon: {
-      width: 20,
-      height: 20,
     },
   });
   
