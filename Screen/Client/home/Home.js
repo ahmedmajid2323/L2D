@@ -2,6 +2,7 @@ import { StyleSheet, Text, View , Image, TextInput, ScrollView, Pressable, Linki
 import React, { useState } from 'react'
 import LinearGradient from 'react-native-linear-gradient'
 import Ionicons from 'react-native-vector-icons/Ionicons'
+import Icon from 'react-native-vector-icons/Feather'
 
 const Home = ({navigation}) => {
 
@@ -83,7 +84,7 @@ const Home = ({navigation}) => {
         
                 <View style={{flexDirection:'row', alignItems:'center', paddingHorizontal:20}}>
                   <TextInput style={{backgroundColor:'white',borderRadius:50,padding:10,zIndex:0,width:'100%',paddingHorizontal:20}} placeholder='search courses here...'/>
-                  <Image style={{position:'relative',left:-35,zIndex:1}} source={require('../../../assets/icon_search.png')} />
+                  <Icon name='search' color='black' size={20} style={{position:'relative',left:-40,zIndex:1}} />
                 </View>
 
                 <ScrollView>
@@ -113,13 +114,13 @@ const Home = ({navigation}) => {
                           <View style={{flexDirection:'row',gap:20,alignItems:'center',justifyContent:'flex-end',marginRight:10}}>
                             <Pressable onPress={()=>handleCall(mentor.phone_num)}
                              style={{flexDirection:'row',alignItems:'center',gap:10}}>
-                              <Image style={{width:20,height:20}} source={require('../../../assets/icons/phone.png')}/> 
+                              <Icon name='phone' color='white' size={20} />
                               <Text style={{color:'white'}}>call</Text>
                             </Pressable>
                             {/*** use redux to pass the mentor willing to talk to ****/}
                             <Pressable onPress={()=>navigation.navigate('chat')}
                              style={{flexDirection:'row',alignItems:'center',gap:10}}>
-                              <Image source={require('../../../assets/icons/message.png')}/>
+                              <Icon name='message-square' color='white' size={20} />
                               <Text style={{color:'white'}}>message</Text>
                             </Pressable>
                           </View>
