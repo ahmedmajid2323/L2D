@@ -10,25 +10,52 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import SelectDropdown from 'react-native-select-dropdown';
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import AntDesign from 'react-native-vector-icons/AntDesign'
+import firestore from '@react-native-firebase/firestore';
+import { useSelector } from 'react-redux';
+import LoaderKit from 'react-native-loader-kit'
 
 const Agenda = () => {
 
+  const admin = useSelector(state=>state.admin.admin_credentiels)
+
+  const [Loading, setLoading] = useState(false)
+
   const today = new Date();
   const date_aujourdhui = format(today, 'yyyy-MM-dd');
+  const [Selected_date, setSelected_date] = useState()
+  const [task, settask] = useState()
+  const [lesson, setlesson] = useState()
+
   const [modal_state, setmodal_state] = useState(false)
   const [show, setShow] = useState(false);
   const [Time, setTime] = useState(new Date());
-  const Clients = [
-    {name: '2024'},
-    {name: '2025'},
-    {name: '2026'},
-    {name: '2027'},
-    {name: '2028'},
-    {name: '2029'},
-    {name: '2030'},
-    {name: '2031'},
-    {name: '2032'},
-  ];
+
+  const [Clients, setClients] = useState([])
+  useEffect(() => {
+    let isMounted = true;
+    const fetchClients = async () => {
+      try {
+        const querySnapshot = await firestore()
+          .collection('users')
+          .where('type', '==', 'client')
+          .get();
+        if (isMounted) {
+          const clientsData = querySnapshot.docs.map(doc => doc.data());
+          setClients(clientsData);
+        }
+      } catch (error) {
+        console.error('Error fetching clients:', error);
+      }
+    };
+    fetchClients();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const [Selected_client, setSelected_client] = useState()
+  
   const lesson_type = [
     {type: 'conduite'},
     {type: 'code'},
@@ -58,35 +85,32 @@ const Agenda = () => {
     },
   });
 
+  const [DATA, setDATA] = useState([]);
+  const [Filtred_data, setFiltred_data] = useState([{ title: date_aujourdhui, data: [] }]);
+
+  useEffect(() => {
+    setLoading(true)
+    const subscriber = firestore()
+      .collection('users')
+      .doc(admin.uid)
+      .onSnapshot((documentSnapshot) => {
+        const data = documentSnapshot.data();
+        const agenda = data?.agenda || [];
+        setDATA(agenda);
+
+        const todayFiltered = agenda.filter((day) => day.title === date_aujourdhui);
+        setFiltred_data(todayFiltered.length > 0 ? todayFiltered : [{ title: date_aujourdhui, data: [] }]);
+        setLoading(false)
+      });
+
+    return () => subscriber();
+  }, []);
+  
   const handleDateChange = (date) => {
+    setSelected_date(date)
     const filtered = DATA.filter(day => day.title === date);
     setFiltred_data(filtered.length > 0 ? filtered : [{ title: date, data: [] }]);
   }
-
-  const DATA = [
-    {
-      title: '2024-12-05', // Date group
-      data: [
-        { task: 'Meeting with Team A',name:'ahmed majid salhi', time: '10:00 AM', 'deleted': false },
-        { task: 'Call with Client',name:'aziz khadhraoui', time: '9:00 PM' , 'deleted': false },
-      ],
-    },
-    {
-      title: '2024-12-06', // Date group
-      data: [
-        { task: 'Submit Project Report',name:'youssef boujmil', time: '12:00 PM', 'deleted': false  },
-        { task: 'Submit Project Report',name:'sahar guebsi', time: '15:00 PM', 'deleted': false  },
-      ],
-    },
-    {
-      title: '2024-12-07',
-      data: [{ task: 'Team Building Activity',name:'rim barnat', time: '3:00 PM' , 'deleted': false }],
-    },
-  ];
-
-  const [Filtred_data, setFiltred_data] = useState(
-    DATA.filter(day => day.title === date_aujourdhui)
-  )
 
   const handleSwipeableOpen = (item) => {
     const updatedData = Filtred_data.map(group => {
@@ -102,6 +126,54 @@ const Agenda = () => {
     });
     setFiltred_data(updatedData); 
   };
+
+  const add_new_task = ()=>{
+    if (!Selected_client || !task || !lesson ) {
+      Alert.alert('warning','all fields are required')
+    } else  {
+      setLoading(true)
+
+      /***************************************** add task to admin *****************************************/
+
+      firestore().collection('users').where('email','==',admin.email)
+      .get().then((querySnapshot)=>{
+        querySnapshot.forEach(doc=>{
+          const docRef = firestore().collection('users').doc(doc.id); 
+          docRef
+            .update({
+              agenda: firestore.FieldValue.arrayUnion({
+                title: Selected_date,
+                data: {
+                  task,
+                  user: {
+                    name: Selected_client.name,
+                    phone: Selected_client.phone,
+                    address: Selected_client.address,
+                  },
+                  time : Time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), 
+                  lesson : lesson.type
+                },
+              }),
+            })
+            .then(() => {
+              console.log('Agenda updated successfully!');
+              setmodal_state(false),
+              settask(''),
+              setSelected_client()
+              setTime(new Date())
+              setlesson()
+              setLoading(false)
+            })
+            .catch((error) => {
+              console.error('Error updating agenda:', error);
+            });
+        })
+      })
+
+      /***************************************** add task to client *****************************************/
+
+    }
+  }
   
   // Render each item in the agenda list
   const renderItem = ({ item }) => (
@@ -132,11 +204,11 @@ const Agenda = () => {
           <View style={{borderBottomWidth:1 , borderColor:'red',paddingBottom:10,flexDirection:'row',justifyContent:'space-between',alignItems:'center'}} >
             <View>
               <Text style={styles.itemTask}>{item.task}</Text>
-              <Text style={styles.itemName}>{item.name}</Text>
+              <Text style={styles.itemName}>{item.user.name}</Text>
             </View>
             <View style={{flexDirection:'column',alignItems:'center'}} >
               <Text style={styles.itemTime}>{item.time}</Text>
-              <Text style={styles.itemTime}>(conduite)</Text>
+              <Text style={styles.itemTime}>{item.lesson}</Text>
             </View>
           </View>
           <View style={{alignItems:'center',flexDirection:'row',justifyContent:'space-between',paddingTop:10}}>
@@ -180,7 +252,13 @@ const Agenda = () => {
       </CalendarProvider>
 
       <View style={{alignItems:'flex-end',marginHorizontal:20}}>
-        <TouchableOpacity onPress={()=>setmodal_state(true)}
+        <TouchableOpacity onPress={()=>{
+          if (!Selected_date) {
+            Alert.alert('Date required !','please select a date then add your new task.')
+          } else {
+            setmodal_state(true)
+          }
+        }}
         style={{backgroundColor:'red',width:50,height:50,borderRadius:50,alignItems:'center',justifyContent:'center',elevation:10}} >
           <AntDesign name='pluscircleo' color='white' size={30} />
         </TouchableOpacity>
@@ -192,11 +270,12 @@ const Agenda = () => {
 
             <View style={{borderBottomColor:'red', paddingBottom:10,borderBottomWidth:1,flexDirection:'row',gap:45}} >
               <View style={{gap:10}}>
-                <TextInput style={{borderRadius:10,height:40,width:150,backgroundColor:'white',paddingHorizontal:10}} placeholder='task..' />
+                <TextInput onChangeText={(text)=>settask(text)}
+                style={{borderRadius:10,height:40,width:150,backgroundColor:'white',paddingHorizontal:10}} placeholder='task..' />
                 <SelectDropdown
                   data={Clients}
                   onSelect={(selectedItem, index) => {
-                    setCurrentYear(selectedItem.name)              
+                    setSelected_client((Clients.filter(client=> client.email === selectedItem.email))[0])              
                   }}
                   renderButton={(selectedItem, isOpened) => {
                     return (
@@ -227,7 +306,7 @@ const Agenda = () => {
                 <SelectDropdown
                   data={lesson_type}
                   onSelect={(selectedItem, index) => {
-                    setCurrentYear(selectedItem.type)              
+                    setlesson(selectedItem)              
                   }}
                   renderButton={(selectedItem, isOpened) => {
                     return (
@@ -253,20 +332,27 @@ const Agenda = () => {
               
             </View>
             <View style={{marginTop:10,justifyContent:'space-between',flexDirection:'row'}} >
-              <TextInput 
+              <TextInput value={Selected_client?.phone}
               editable={false} style={{borderRadius:10,height:40,width:150,backgroundColor:'white',paddingHorizontal:10}} placeholder='phone' />
               <View style={{flexDirection:'row',alignItems:'center'}}>
-                <TextInput 
+                <TextInput value={Selected_client?.address}
                 editable={false} style={{borderRadius:10,height:40,width:150,backgroundColor:'white',paddingHorizontal:10}} placeholder='location' />
                 <Image style={{width:25 , height:30,position:'absolute',marginLeft:120}} source={require('../../assets/icons/location.png')} />
               </View>
               
             </View>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'center',marginTop:20,gap:20}} >
-              <TouchableOpacity style={{padding:10,borderRadius:10,backgroundColor:'white',borderWidth:1,borderColor:'red'}} >
+              <TouchableOpacity onPress={add_new_task}
+              style={{padding:10,borderRadius:10,backgroundColor:'white',borderWidth:1,borderColor:'red'}} >
                 <Text style={{color:'red'}} >Ok</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={()=>setmodal_state(false)}
+              <TouchableOpacity onPress={()=>{
+                setmodal_state(false),
+                settask(''),
+                setSelected_client()
+                setTime(new Date())
+                setlesson()
+              }}
               style={{padding:10,borderRadius:10,backgroundColor:'white',borderWidth:1,borderColor:'red'}}>
                 <Text style={{color:'red'}}>Cancel</Text>
               </TouchableOpacity>
@@ -286,6 +372,18 @@ const Agenda = () => {
           onChange={onChange}
         />
       )}
+
+      <Modal transparent visible={Loading} animationType='fade' >
+        <TouchableWithoutFeedback onPress={()=>setLoading(false)} >
+          <View style={{backgroundColor:'rgba(0,0,0,0.6)',flex:1,justifyContent:'center',alignItems:'center'}} >
+            <LoaderKit
+            style={{ width: 50, height: 50 }}
+            name={'BallBeat'} 
+            color={'red'} 
+            />
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
 
     </LinearGradient>
   );

@@ -1,10 +1,17 @@
-import { StyleSheet, Text, View , Image, TextInput, ScrollView, Pressable, Linking, Alert} from 'react-native'
+import { StyleSheet, Text, View , Image, TextInput, ScrollView, Pressable, Linking, Alert, TouchableOpacity} from 'react-native'
 import React, { useState } from 'react'
 import LinearGradient from 'react-native-linear-gradient'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import Icon from 'react-native-vector-icons/Feather'
+import auth from '@react-native-firebase/auth';
+import { useDispatch, useSelector } from 'react-redux'
+import Icon_logout from 'react-native-vector-icons/SimpleLineIcons'
+import { setUser_type } from '../../../redux/slices/typeSlice'
 
 const Home = ({navigation}) => {
+
+  const dispatch = useDispatch()
+  const user_credentiels = useSelector(state => state.client.client_credentiels)
 
   const [categories, setcategories] = useState(
     [
@@ -43,20 +50,33 @@ const Home = ({navigation}) => {
     .catch((error)=>console.log('error making phone call',error))
   }
   
+  const handleLogout = ()=>{
+    auth().signOut()
+    dispatch(setUser_type(''))
+  }
 
   return (
     <LinearGradient 
     colors={['#000B14', '#020F19', '#051622', '#09202F', '#11324A', '#153A54']}
     style={styles.linearGradient}>
 
-      <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginTop:10, paddingHorizontal:20}}>
+      <View style={{alignItems:'flex-end'}}>
+        <TouchableOpacity 
+        style={{flexDirection:'row',alignItems:'center',gap:10,padding:10,borderColor:'red',borderWidth:1,borderRadius:10,marginHorizontal:20}}
+          onPress={handleLogout} >
+              <Icon_logout name='logout' size={15} color='white'  />
+              <Text style={{color:'white',fontWeight:700,fontSize:10}}>Sign Out</Text>
+        </TouchableOpacity>
+      </View>
+     
+
+      <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center', paddingHorizontal:20,marginTop:-20}}>
         <View style={{flexDirection:'col',gap:2}}>
           <Text style={{color:'white',opacity:0.5,fontSize:17}}>Welcome</Text>
-          <Text style={{color:'white',fontWeight:700,fontSize:25}}>James Gordon</Text>
+          <Text style={{color:'white',fontWeight:700,fontSize:25}}>{user_credentiels.name}</Text>
           <Text style={{color:'green'}}>1520 XP</Text>
         </View>
         <View style={{flexDirection:'row',gap:5,alignItems:'center'}}>
-          <Ionicons name='notifications' size={50}  />
           <Image source={require('../../../assets/user.png')} />
         </View>
       </View>
@@ -152,7 +172,7 @@ export default Home
 const styles = StyleSheet.create({
   linearGradient:{
       flex:1,
-      paddingTop:20,
+      paddingTop:10,
       gap:30
   },
   container: {

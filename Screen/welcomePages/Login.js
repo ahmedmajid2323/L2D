@@ -1,8 +1,54 @@
-import { StyleSheet, Text, View,Image, TextInput, Pressable, } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, View,Image, TextInput, Pressable, TouchableOpacity, Alert, Modal, TouchableWithoutFeedback } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import LinearGradient from 'react-native-linear-gradient'
+import firestore from '@react-native-firebase/firestore';
+import { useDispatch, useSelector } from 'react-redux';
+import auth from '@react-native-firebase/auth';
+import { setAccount_status } from '../../redux/slices/Client_slice';
+import LoaderKit from 'react-native-loader-kit'
 
 const Login = ({navigation}) => {
+
+    const account_status = useSelector(state=>state.client.account_status)
+    const dispatch = useDispatch()
+
+    const [Email, setEmail] = useState('')
+    const [Password, setPassword] = useState('')
+    const [Loading, setLoading] = useState(false)
+
+    useEffect(() => {
+        if(account_status === 'pending' || account_status === 'rejected'){
+            Alert.alert('Warning', `youre account hasn't been approved yet`, [
+                {
+                  text: 'Ok',
+                  onPress: () => {
+                        dispatch(setAccount_status(''))
+                        setEmail('')
+                        setPassword('')
+                        auth().signOut()
+                        setLoading(false)
+                    },
+                },
+              ]);
+        }
+    }, [account_status])
+    
+
+    const handleSubmit = () =>{
+        if ( !Email.trim() || !Password.trim()) {
+            Alert.alert('warning' , ' all fields are required !')
+        } else {
+            auth()
+                .signInWithEmailAndPassword(Email.trim(), Password)
+                .then(() => setLoading(true))
+                .catch((error) => {
+                    Alert.alert('Wrong Credentials', error.message, [
+                    { text: 'OK', onPress: () => setLoading(false) },
+                    ]);
+                });
+        }
+    }
+
   return (
     <LinearGradient 
     colors={['#000B14', '#020F19', '#051622', '#09202F', '#11324A', '#153A54']}
@@ -17,16 +63,18 @@ const Login = ({navigation}) => {
         <View style={styles.form}>
             <View>
                 <Text style={styles.text}>Email :</Text>
-                <TextInput style={styles.input} />
+                <TextInput onChangeText={(text)=>setEmail(text)} value={Email}
+                style={styles.input} />
             </View>
             <View>
                 <Text style={styles.text}>Password :</Text>
-                <TextInput style={styles.input} />
+                <TextInput onChangeText={(text)=>setPassword(text)} secureTextEntry value={Password}
+                style={styles.input} />
             </View>
-            <Pressable onPress={()=>navigation.navigate('ClientScreen')}
+            <TouchableOpacity onPress={handleSubmit}
             style={styles.button}>
                 <Text style={{color:'white',textAlign:'center'}}>Sign In</Text>
-            </Pressable>
+            </TouchableOpacity>
         </View>
         <Text style={{textAlign:'center',color:'white',marginVertical:20,fontSize:24}}>forgot password ?</Text>
         <View style={{flexDirection:'row',alignItems:'center',justifyContent:'center'}}>
@@ -40,6 +88,18 @@ const Login = ({navigation}) => {
                 <Text style={{color:'white',textAlign:'center'}}>Create Account</Text>
             </Pressable>
         </View>
+
+        <Modal transparent visible={Loading} animationType='fade' >
+            <TouchableWithoutFeedback onPress={()=>setLoading(false)} >
+                <View style={{backgroundColor:'rgba(0,0,0,0.6)',flex:1,justifyContent:'center',alignItems:'center'}} >
+                    <LoaderKit
+                    style={{ width: 50, height: 50 }}
+                    name={'BallBeat'} 
+                    color={'red'} 
+                    />
+                </View>
+            </TouchableWithoutFeedback>
+        </Modal>
         
     </LinearGradient>
   )

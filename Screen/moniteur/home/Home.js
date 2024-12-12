@@ -1,23 +1,57 @@
-import { Image, Pressable, ScrollView, StyleSheet, Text, View , TextInput } from 'react-native'
-import React from 'react'
+import { Image, Pressable, ScrollView, StyleSheet, Text, View , TextInput, TouchableOpacity } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import Icon from 'react-native-vector-icons/Feather'
+import Icon_logout from 'react-native-vector-icons/SimpleLineIcons'
 import LinearGradient from 'react-native-linear-gradient'
+import auth from '@react-native-firebase/auth';
+import { useDispatch, useSelector } from 'react-redux'
+import { setUser_type } from '../../../redux/slices/typeSlice'
+import firestore from '@react-native-firebase/firestore';
 
 const Home = ({navigation}) => {
 
-    const client_data = [
-        {name:'client name 1' , phone_num : '+216 12 345 678'},
-        {name:'client name 2' , phone_num : '+216 87 654 321'},
-        {name:'client name 1' , phone_num : '+216 12 345 678'},
-        {name:'client name 2' , phone_num : '+216 87 654 321'},
-        {name:'client name 1' , phone_num : '+216 12 345 678'},
-        {name:'client name 2' , phone_num : '+216 87 654 321'},
-    ]
+    const dispatch = useDispatch()
+    const admin_credentiels = useSelector(state=>state.admin.admin_credentiels)
+
+    const [Clients, setClients] = useState([])
+    useEffect(() => {
+        let isMounted = true;
+        const fetchClients = async () => {
+          try {
+            const querySnapshot = await firestore()
+              .collection('users')
+              .where('type', '==', 'client')
+              .get();
+            if (isMounted) {
+              const clientsData = querySnapshot.docs.map(doc => doc.data());
+              setClients(clientsData);
+            }
+          } catch (error) {
+            console.error('Error fetching clients:', error);
+          }
+        };
+        fetchClients();
+    
+        return () => {
+          isMounted = false;
+        };
+    }, []);
+
+    const handleLogout = ()=>{
+        dispatch(setUser_type(''))
+        auth().signOut()
+    }
 
   return (
     <LinearGradient
     colors={['#000B14', '#020F19', '#051622', '#09202F', '#11324A', '#153A54']}
     style={styles.screen}>
+
+        <TouchableOpacity style={{flexDirection:'row',alignItems:'center',gap:10,padding:5,borderColor:'red',borderWidth:1,borderRadius:10,paddingVertical:10,width:103}}
+        onPress={handleLogout} >
+            <Icon_logout name='logout' size={20} color='white'  />
+            <Text style={{color:'white',fontWeight:700}}>Sign Out</Text>
+        </TouchableOpacity  >
 
         <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginTop:10, paddingHorizontal:20}}>
             <View style={{flexDirection:'col',gap:2}}>
@@ -36,7 +70,7 @@ const Home = ({navigation}) => {
 
         <ScrollView style={{flexDirection:'column',gap:20,marginTop:20}}>
             {
-                client_data.map((client , index)=>(
+                Clients.map((client , index)=>(
                     <View key ={index} style={styles.box_client}>
                         <Pressable onPress={()=>navigation.navigate('profile')} >
                             <Image source={require('../../../assets/mentor_man.png')} />

@@ -19,6 +19,7 @@
     "@react-navigation/bottom-tabs": "^7.0.5",
     "@react-navigation/native": "^7.0.3",
     "@react-navigation/native-stack": "^7.0.4",
+    "@reduxjs/toolkit": "^2.4.0",
     "date-fns": "^4.1.0",
     "react": "18.2.0",
     "react-native": "0.74.5",
@@ -27,6 +28,7 @@
     "react-native-gesture-handler": "^2.21.2",
     "react-native-gifted-charts": "^1.4.47",
     "react-native-linear-gradient": "^2.8.3",
+    "react-native-loader-kit": "^2.0.8",
     "react-native-maps": "^1.20.1",
     "react-native-permissions": "^5.2.1",
     "react-native-reanimated": "^3.16.2",
@@ -35,7 +37,9 @@
     "react-native-select-dropdown": "^4.0.1",
     "react-native-svg": "^15.10.1",
     "react-native-svg-transformer": "^1.5.0",
-    "react-native-vector-icons": "^10.2.0"
+    "react-native-vector-icons": "^10.2.0",
+    "react-redux": "^9.1.2",
+    "redux": "^5.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

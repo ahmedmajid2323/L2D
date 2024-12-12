@@ -4,7 +4,7 @@ import SignUp from "../Screen/welcomePages/SignUp";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../Screen/Client/home/Home";
 import Circuits from "../Screen/Client/lessons/Circuits";
-import Settings from "../Screen/Client/Settings";
+import Settings from "../Screen/Client/settings/Settings";
 import { Image, Text, View } from "react-native";
 import HomePage from "../Screen/welcomePages/homepage";
 import LinearGradient from "react-native-linear-gradient";

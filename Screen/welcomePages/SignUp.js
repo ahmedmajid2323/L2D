@@ -1,8 +1,15 @@
-import { StyleSheet, Text, View,Image, TextInput, Pressable, TouchableOpacity, Alert} from 'react-native'
+import { StyleSheet, Text, View,Image, TextInput, Pressable, TouchableOpacity, Alert, Modal,TouchableWithoutFeedback} from 'react-native'
 import React, { useState } from 'react'
 import LinearGradient from 'react-native-linear-gradient'
+import Icon from 'react-native-vector-icons/Feather'
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+import LoaderKit from 'react-native-loader-kit'
 
 const SignUp = ({navigation}) => {
+
+    const [Modal_registred, setModal_registred] = useState(false)
+    const [Loading, setLoading] = useState(false)
 
     const [Next_step, setNext_step] = useState(false)
     const [userCredentiels, setuserCredentiels] = useState({
@@ -21,7 +28,40 @@ const SignUp = ({navigation}) => {
             || !userCredentiels.password.trim() || !userCredentiels.email.trim() ) {
                 Alert.alert('alert' , 'All fields are required !')
         }else{
-            console.log('submitted')
+            try {
+                setLoading(true)
+                auth()
+                    .createUserWithEmailAndPassword( userCredentiels.email.trim() , userCredentiels.password.trim() )
+                    .then(()=>{
+                        firestore()
+                            .collection('users')
+                            .add({
+                                name: userCredentiels.full_name.trim(),
+                                email: userCredentiels.email.trim().toLowerCase(),
+                                address: userCredentiels.address.trim(),
+                                phone: userCredentiels.phone.trim(),
+                                type: 'client',
+                                agenda: [],
+                                account_status: 'pending', // 'approved' , 'rejected'
+                            })
+                            .then(() => {
+                                setLoading(false)
+                                setModal_registred(true)
+                                setuserCredentiels({
+                                    email:'',
+                                    full_name:'',
+                                    address:'',
+                                    phone:'',
+                                    password: '',
+                                })
+                                setNext_step(!Next_step)
+                                setPasswordConfirmation('')
+                            });
+                    })
+            } catch (error) {
+                console.log('error creating new account',error)
+            }
+            
         } 
     }
 
@@ -48,7 +88,7 @@ const SignUp = ({navigation}) => {
                     </View>
                     <View>
                         <Text style={styles.text}>Address : </Text>
-                        <TextInput value={userCredentiels?.adress}
+                        <TextInput value={userCredentiels?.address}
                         onChangeText={(text)=>setuserCredentiels(prev=>({...prev, address: text}))}
                         style={styles.input} />
                     </View>
@@ -70,6 +110,9 @@ const SignUp = ({navigation}) => {
                 )
                 :(
                     <>
+                    <Pressable onPress={()=>setNext_step(!Next_step)} >
+                        <Icon name='arrow-left' color='red' size={20}/>
+                    </Pressable>
                     <View>
                         <Text style={styles.text}>Email : </Text>
                         <TextInput value={userCredentiels?.email}
@@ -105,6 +148,38 @@ const SignUp = ({navigation}) => {
             <Text style={{textAlign:'center',color:'white',marginVertical:20,fontSize:20}}>Already have an account ? </Text>
             <Pressable onPress={()=>navigation.navigate('login')}><Text style={{color:'red',textDecorationLine:'underline',fontSize:17}}>SignIn</Text></Pressable>
         </View>
+
+        <Modal transparent visible={Modal_registred} animationType='fade' >
+            <TouchableWithoutFeedback onPress={()=>setModal_registred(false)} >
+            <View style={styles.modal} >
+                <View style={styles.modal_square}>
+
+                    <View style={{gap:10}}>
+                        <View style={{flexDirection:'row',gap:10,alignItems:'center',justifyContent:'center'}}>
+                            <Icon name='check-circle' color='green' size={25} />
+                            <Text style={{color:'#000B14',fontSize:15}} >account registred successfully !</Text>
+                        </View>
+                        <Text style={{color:'#000B14',fontSize:15,textAlign:'center'}}>Please wait for the approval of the admin</Text>
+                    </View>
+                    <TouchableOpacity style={{borderRadius:20,backgroundColor:'red',padding:10,width:100}}
+                    onPress={()=>setModal_registred(false)} >
+                        <Text style={{color:'white',fontWeight:700,textAlign:'center'}}>Ok</Text>
+                    </TouchableOpacity>
+
+                </View>
+            </View>
+            </TouchableWithoutFeedback>
+        </Modal>
+
+        <Modal transparent visible={Loading} animationType='fade' >
+            <View style={{backgroundColor:'rgba(0,0,0,0.6)',flex:1,justifyContent:'center',alignItems:'center'}} >
+                <LoaderKit
+                style={{ width: 50, height: 50 }}
+                name={'BallBeat'} 
+                color={'red'} 
+                />
+            </View>
+        </Modal>
         
     </LinearGradient>
   )
@@ -145,5 +220,20 @@ const styles = StyleSheet.create({
         width:'40%',
         height:1,
         backgroundColor:'white'
+    },
+    modal:{
+        flex:1,
+        alignItems:'center',
+        justifyContent:'center',
+        backgroundColor:'rgba(0,0,0,0.6)'
+    },
+    modal_square:{
+        backgroundColor:'white',
+        elevation:10,
+        borderRadius:20,
+        padding:20,
+        alignItems:'center',
+        justifyContent:'center',
+        gap:20
     }
 })
