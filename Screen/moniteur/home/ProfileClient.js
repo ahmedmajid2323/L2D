@@ -1,8 +1,11 @@
-import { StyleSheet, Text, View , Image , Pressable, TouchableOpacity, ScrollView} from 'react-native'
+import { StyleSheet, Text, View , Image , Pressable, TouchableOpacity, ScrollView, Linking, Alert} from 'react-native'
 import React from 'react'
 import LinearGradient from 'react-native-linear-gradient'
 import Icon from 'react-native-vector-icons/Feather'
 import { LineChart, PieChart } from "react-native-gifted-charts";
+import { useDispatch, useSelector } from 'react-redux';
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import { filterAgenda_client } from '../../../redux/slices/Admin_slice';
 
 const renderDot = color => {
     return (
@@ -34,12 +37,12 @@ const renderLegendComponent = () => {
               width: 120,
               marginRight: 20,
             }}>
-            {renderDot('#006DFF')}
+            {renderDot('red')}
             <Text style={{color: 'white'}}>Conduite: 50H</Text>
           </View>
           <View
             style={{flexDirection: 'row', alignItems: 'center', width: 120}}>
-            {renderDot('#8F80F3')}
+            {renderDot('black')}
             <Text style={{color: 'white'}}>Code: 40H</Text>
           </View>
         </View>
@@ -51,7 +54,7 @@ const renderLegendComponent = () => {
               width: 120,
               marginRight: 20,
             }}>
-            {renderDot('#3BE9DE')}
+            {renderDot('purple')}
             <Text style={{color: 'white'}}>Parking: 10H</Text>
           </View>
         </View>
@@ -59,33 +62,62 @@ const renderLegendComponent = () => {
     );
   };
 
-const ProfileClient = ({navigation}) => {
+const ProfileClient = ({route , navigation}) => {
 
-    const evaluation_data = [
-        {value: 8, dataPointText: '8'}, 
-        {value: 5, dataPointText: '5'}, 
-        {value: 7, dataPointText: '7'}, 
-        {value: 4, dataPointText: '4'}, 
-        {value: 9, dataPointText: '9'}, 
-        {value: 8, dataPointText: '8'}, 
-        {value: 5, dataPointText: '5'}
-    ];
+  const { client } = route.params;
 
-    const pieData = [
-        {
-          value: 50,
-          color: '#009FFF',
-          gradientCenterColor: '#006DFF',
-          focused: true,
-        },
-        {value: 40, color: '#93FCF8', gradientCenterColor: '#3BE9DE'},
-        {value: 10, color: '#BDB2FA', gradientCenterColor: '#8F80F3'},
-      ];
+  const dispatch = useDispatch()
+  const agenda = useSelector(state => state.admin.admin_agenda)
+
+  const View_client_calendar = () =>{
+    navigation.navigate('client_agenda' , {client})
+  }
+
+  const evaluation_data = [
+      {value: 8, dataPointText: '8'}, 
+      {value: 5, dataPointText: '5'}, 
+      {value: 7, dataPointText: '7'}, 
+      {value: 4, dataPointText: '4'}, 
+      {value: 9, dataPointText: '9'}, 
+      {value: 8, dataPointText: '8'}, 
+      {value: 5, dataPointText: '5'}
+  ];
+
+  const pieData = [
+    {
+      value: 50,
+      color: 'red',
+      gradientCenterColor: '#006DFF',
+      focused: true,
+    },
+    {value: 40, color: 'black', gradientCenterColor: '#3BE9DE'},
+    {value: 10, color: 'purple', gradientCenterColor: '#8F80F3'},
+  ];
+
+  const handleCall = (phoneNumber) =>{
+    const url = `tel:${phoneNumber}`
+    Linking.canOpenURL(url)
+    .then((supported)=>{
+      if (!supported) {
+        Alert.alert('Error','phone calls are not supported on this devices')
+      } else {
+        Linking.openURL(url)
+      }
+    })
+    .catch((error)=>console.log('error making phone call',error))
+  }
 
   return (
+
     <LinearGradient 
     colors={['#000B14', '#020F19', '#051622', '#09202F', '#11324A', '#153A54']}
     style={styles.screen}>
+
+        <TouchableOpacity onPress={()=>navigation.navigate('home')}
+        style={{flexDirection:'row',alignItems:'center',gap:5,padding:10,backgroundColor:'red',width:85,borderRadius:20}} >
+          <AntDesign name='arrowleft' color='white' size={15} />
+          <Text style={{fontWeight:700,color:'white'}}>return</Text>
+        </TouchableOpacity>
       
         <View style={styles.profileContainer}>
             <ScrollView>
@@ -93,16 +125,10 @@ const ProfileClient = ({navigation}) => {
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-around'}}>
                 <Image style={{width:50 , height:50}} source={require('../../../assets/user.png')}  />
                 <View style={{flexDirection:'column',alignItems:'center',gap:10}}>
-                    <Text style={{fontWeight:600, color:'#ffffff',fontSize:25}}>Full name</Text>
-                    <View style={{flexDirection:'row',gap:20}}>
-                        {/* <View style={{flexDirection:'row',alignItems:'center',gap:5}}>
-                            <Icon name='phone' color='white' size={20} />
-                            <Text style={{color:'white'}}>+216 23 456 789</Text>
-                        </View> */}
-                        <View style={{flexDirection:'row',alignItems:'center',gap:5}}>
-                            <Icon name='message-square' color='white' size={20} />
-                            <Text style={{color:'white'}}>Send message</Text>
-                        </View>
+                    <Text style={{fontWeight:600, color:'#ffffff',fontSize:25}}>{client.name}</Text>
+                    <View style={{flexDirection:'row',alignItems:'center',gap:5}}>
+                        <Icon name='message-square' color='white' size={20} />
+                        <Text style={{color:'white'}}>Send message</Text>
                     </View>
                 </View>
             </View>
@@ -111,33 +137,35 @@ const ProfileClient = ({navigation}) => {
                 <View style={{width:'100%',gap:3}}>
                     <Text style={{color:'white',fontWeight:200}}>Email</Text>
                     <View style={{backgroundColor:'transparent',padding:10,borderRadius:10,borderWidth:1,borderColor:'red'}}>
-                        <Text style={{fontWeight:700,color:'#ffffff'}}>Start new lesson</Text>
+                        <Text style={{fontWeight:700,color:'#ffffff'}}>{client.email}</Text>
                     </View>
                 </View>
                 <View style={{width:'100%',gap:3}}>
                     <Text style={{color:'white',fontWeight:200}}>Address</Text>
                     <View style={{backgroundColor:'transparent',padding:10,borderRadius:10,borderWidth:1,borderColor:'red'}}>
-                        <Text style={{fontWeight:700,color:'#ffffff'}}>address here</Text>
+                        <Text style={{fontWeight:700,color:'#ffffff'}}>{client.address}</Text>
                     </View>
                 </View>
                 <View style={{gap:3}}>
                     <Text style={{color:'white',fontWeight:200}}>Phone</Text>
                     <View style={{flexDirection:'row'}}>
                         <View style={{backgroundColor:'transparent',padding:10,borderTopLeftRadius:10,borderBottomLeftRadius:10,borderWidth:1,borderColor:'red',width:'80%',borderRightWidth:0}}>
-                            <Text style={{fontWeight:700,color:'#ffffff'}}>+216 12 587 658</Text>
+                            <Text style={{fontWeight:700,color:'#ffffff'}}>{client.phone}</Text>
                         </View>
-                        <TouchableOpacity style={{padding:10 , borderTopRightRadius:10 , borderBottomRightRadius:10 , backgroundColor:'green',width:'20%',alignItems:'center'}}>
+                        <TouchableOpacity onPress={()=>handleCall(client.phone)}
+                        style={{padding:10 , borderTopRightRadius:10 , borderBottomRightRadius:10 , backgroundColor:'green',width:'20%',alignItems:'center'}}>
                             <Icon name='phone' size={20} color='white' />
                         </TouchableOpacity>
                     </View>
                 </View>
-                <TouchableOpacity style={{backgroundColor:'red',padding:10,borderRadius:10,borderWidth:1,borderColor:'red',width:'100%',elevation:10}}>
+                <TouchableOpacity onPress={()=>View_client_calendar()}
+                style={{backgroundColor:'red',padding:10,borderRadius:10,borderWidth:1,borderColor:'red',width:'100%',elevation:10}}>
                     <Text style={{fontWeight:700,color:'#ffffff',textAlign:'center'}}>See Calendar</Text>
                 </TouchableOpacity>
 
                 {/************************************************************************* Charts ***************************************************************/}
 
-                <View style={{padding: 16,borderRadius: 10,borderWidth:1,borderColor:'red',alignItems:'center'}}>
+                <View style={{padding: 16,borderRadius: 10,borderWidth:1,borderColor:'red',alignItems:'center',backgroundColor:'#09202F'}}>
                     <View style={{borderBottomWidth:1, borderColor:'red',paddingBottom:20}}>
                         <Text style={{color: 'white', fontSize: 16, fontWeight: 'bold',textAlign:'center'}}>
                             Lessons taken
@@ -150,7 +178,7 @@ const ProfileClient = ({navigation}) => {
                             sectionAutoFocus
                             radius={90}
                             innerRadius={60}
-                            innerCircleColor={'#11324A'}
+                            innerCircleColor={'#09202F'}
                             centerLabelComponent={() => {
                             return (
                                 <View style={{justifyContent: 'center', alignItems: 'center'}}>
@@ -214,8 +242,6 @@ const styles = StyleSheet.create({
     },
     profileContainer:{
         borderRadius:20,
-        borderColor:'red',
-        borderWidth:1,
         flex:1,
         paddingHorizontal:20,
         paddingVertical:10,

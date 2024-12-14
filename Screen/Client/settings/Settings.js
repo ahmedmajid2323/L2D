@@ -4,20 +4,20 @@ import LinearGradient from 'react-native-linear-gradient'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
+import Feather from 'react-native-vector-icons/Feather'
 import { useSelector } from 'react-redux'
-import { PieChart } from 'react-native-gifted-charts'
 import Account_settings from './Account_settings'
 import Hours_component from './Hours'
+import Payment_comp from './Payment'
 
 const Settings = () => {
 
   const user_credentiels = useSelector(state => state.client.client_credentiels)
 
-  /*************************************************** accounts settings ********************************************/
+  /*************************************************** settings ********************************************/
   const [Account, setAccount] = useState(false)
-
-  /*************************************************** hours & tests ********************************************/
   const [Hours, setHours] = useState(false)
+  const [Payment, setPayment] = useState(false)
   
 
   return (
@@ -55,7 +55,13 @@ const Settings = () => {
     }
 
     {
-     (!Account && !Hours) && (
+      Payment && (
+        <Payment_comp setpay_fct={()=>setPayment(false)} />
+      )
+    }
+
+    {
+     (!Account && !Hours && !Payment) && (
      
      <View style={{flexDirection:'column',gap:20,marginTop:50,marginHorizontal:10}} >
 
@@ -77,7 +83,7 @@ const Settings = () => {
         <Icons name='monitor-dashboard' color='white' size={25} />
       </TouchableOpacity>
 
-      <TouchableOpacity 
+      <TouchableOpacity onPress={()=>setPayment(true)}
       style={{borderRadius:20,justifyContent:'space-between',flexDirection:'row',backgroundColor:'#153A54',elevation:10,alignItems:'center',padding:20}}>
         <Text style={{color:'white',fontWeight:600,fontSize:20}}>payment</Text>
         <FontAwesome5 name='coins' color='white' size={25} />

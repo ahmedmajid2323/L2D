@@ -21,13 +21,13 @@ const Account_settings = ({setAccount_fct}) => {
         }}
         keyboardShouldPersistTaps="handled"
       >
-    <View style={{borderRadius:20,borderWidth:1,borderColor:'red',paddingVertical:30,paddingHorizontal:30,marginHorizontal:10}} >
+    <View style={{borderRadius:20,paddingVertical:30,paddingHorizontal:30,marginHorizontal:10,backgroundColor:'#153A54',elevation:10}} >
         <Pressable style={{marginBottom:10}} onPress={()=>{
         setAccount_fct()
         seteditable_state(false)}} >
-            <FontAwesome5 name='arrow-left' color='red' size={20} />
+            <FontAwesome5 name='arrow-left' color='white' size={20} />
         </Pressable>
-        <Text style={{color:'red',fontWeight:700,fontSize:25,textAlign:'center',marginBottom:20}}>User profile</Text>
+        <Text style={{color:'white',fontWeight:700,fontSize:25,textAlign:'center',marginBottom:20}}>User profile</Text>
         <View style={{alignItems:'center',flexDirection:'column',gap:10}}>
 
         <View style={{width:'100%'}}>

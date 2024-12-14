@@ -12,7 +12,7 @@ import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import { setAccount_status, setUser_credentiels } from "../redux/slices/Client_slice";
 import { setUser_type } from "../redux/slices/typeSlice";
-import { setAdmin_credentiels } from "../redux/slices/Admin_slice";
+import { setAdmin_agenda, setAdmin_credentiels } from "../redux/slices/Admin_slice";
 
 const Stack = createNativeStackNavigator();
 

@@ -4,7 +4,7 @@ import LinearGradient from 'react-native-linear-gradient'
 import Icon from 'react-native-vector-icons/Feather'
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import LoaderKit from 'react-native-loader-kit'
+import LottieView from 'lottie-react-native';
 
 const SignUp = ({navigation}) => {
 
@@ -172,13 +172,9 @@ const SignUp = ({navigation}) => {
         </Modal>
 
         <Modal transparent visible={Loading} animationType='fade' >
-            <View style={{backgroundColor:'rgba(0,0,0,0.6)',flex:1,justifyContent:'center',alignItems:'center'}} >
-                <LoaderKit
-                style={{ width: 50, height: 50 }}
-                name={'BallBeat'} 
-                color={'red'} 
-                />
-            </View>
+                <View style={{backgroundColor:'rgba(0,0,0,0.8)',flex:1,justifyContent:'center',alignItems:'center'}} >
+                    <LottieView style={{width:300,height:280}} source={require('../../assets/loading.json')} autoPlay loop />
+                </View>
         </Modal>
         
     </LinearGradient>

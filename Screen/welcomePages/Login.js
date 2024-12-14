@@ -1,11 +1,10 @@
 import { StyleSheet, Text, View,Image, TextInput, Pressable, TouchableOpacity, Alert, Modal, TouchableWithoutFeedback } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import LinearGradient from 'react-native-linear-gradient'
-import firestore from '@react-native-firebase/firestore';
 import { useDispatch, useSelector } from 'react-redux';
 import auth from '@react-native-firebase/auth';
 import { setAccount_status } from '../../redux/slices/Client_slice';
-import LoaderKit from 'react-native-loader-kit'
+import LottieView from 'lottie-react-native';
 
 const Login = ({navigation}) => {
 
@@ -90,15 +89,9 @@ const Login = ({navigation}) => {
         </View>
 
         <Modal transparent visible={Loading} animationType='fade' >
-            <TouchableWithoutFeedback onPress={()=>setLoading(false)} >
-                <View style={{backgroundColor:'rgba(0,0,0,0.6)',flex:1,justifyContent:'center',alignItems:'center'}} >
-                    <LoaderKit
-                    style={{ width: 50, height: 50 }}
-                    name={'BallBeat'} 
-                    color={'red'} 
-                    />
+                <View style={{backgroundColor:'rgba(0,0,0,0.8)',flex:1,justifyContent:'center',alignItems:'center'}} >
+                    <LottieView style={{width:300,height:280}} source={require('../../assets/loading.json')} autoPlay loop />
                 </View>
-            </TouchableWithoutFeedback>
         </Modal>
         
     </LinearGradient>

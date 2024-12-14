@@ -1,4 +1,4 @@
-import { Image, Pressable, ScrollView, StyleSheet, Text, View , TextInput, TouchableOpacity } from 'react-native'
+import { Image, Pressable, ScrollView, StyleSheet, Text, View , TextInput, TouchableOpacity ,Linking, Alert} from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Icon from 'react-native-vector-icons/Feather'
 import Icon_logout from 'react-native-vector-icons/SimpleLineIcons'
@@ -7,12 +7,38 @@ import auth from '@react-native-firebase/auth';
 import { useDispatch, useSelector } from 'react-redux'
 import { setUser_type } from '../../../redux/slices/typeSlice'
 import firestore from '@react-native-firebase/firestore';
+import { setAdmin_agenda } from '../../../redux/slices/Admin_slice'
+import { useIsFocused } from '@react-navigation/native';
 
 const Home = ({navigation}) => {
 
+    const isFocused = useIsFocused();
+
     const dispatch = useDispatch()
     const admin_credentiels = useSelector(state=>state.admin.admin_credentiels)
+    const admin_agenda = useSelector(state=>state.admin.admin_agenda)
+    console.log('this is agenda',admin_agenda)
 
+    const View_client_details = (client)=>{
+
+        firestore()
+            .collection('users')
+            .where('email', '==', client.email)
+            .get()
+            .then(querySnapshot => {
+                querySnapshot.forEach(doc => {
+                    const data = doc.data()
+                    dispatch(setAdmin_agenda(data.agenda));
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching data:", error);
+            });
+
+        navigation.navigate('profile', {client})
+    }
+    
+    /******************************************************* fetching clients *******************************************************/
     const [Clients, setClients] = useState([])
     useEffect(() => {
         let isMounted = true;
@@ -37,6 +63,19 @@ const Home = ({navigation}) => {
         };
     }, []);
 
+    const handleCall = (phoneNumber) =>{
+        const url = `tel:${phoneNumber}`
+        Linking.canOpenURL(url)
+        .then((supported)=>{
+          if (!supported) {
+            Alert.alert('Error','phone calls are not supported on this devices')
+          } else {
+            Linking.openURL(url)
+          }
+        })
+        .catch((error)=>console.log('error making phone call',error))
+    }
+
     const handleLogout = ()=>{
         dispatch(setUser_type(''))
         auth().signOut()
@@ -56,7 +95,7 @@ const Home = ({navigation}) => {
         <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginTop:10, paddingHorizontal:20}}>
             <View style={{flexDirection:'col',gap:2}}>
                 <Text style={{color:'white',opacity:0.5,fontSize:17}}>Welcome</Text>
-                <Text style={{color:'white',fontWeight:700,fontSize:25}}>Moiteur Boujmil</Text>
+                <Text style={{color:'white',fontWeight:700,fontSize:25}}>{admin_credentiels.name}</Text>
             </View>
             <View style={{flexDirection:'row',gap:5,alignItems:'center'}}>
                 <Image style={{width:45 , height: 45}} source={require('../../../assets/user.png')} />
@@ -72,13 +111,13 @@ const Home = ({navigation}) => {
             {
                 Clients.map((client , index)=>(
                     <View key ={index} style={styles.box_client}>
-                        <Pressable onPress={()=>navigation.navigate('profile')} >
+                        <Pressable onPress={()=>View_client_details(client)} >
                             <Image source={require('../../../assets/mentor_man.png')} />
                         </Pressable>
                         <View style={{flexDirection:'col',gap:20}}>
                             <Text style={{fontSize:20,color:'white',marginRight:20}}>{client.name}</Text>
                             <View style={{flexDirection:'row',gap:20,alignItems:'center',justifyContent:'flex-end',marginRight:10}}>
-                            <Pressable /* onPress={()=>handleCall(mentor.phone_num)} */
+                            <Pressable onPress={()=>handleCall(client.phone)}
                                 style={{flexDirection:'row',alignItems:'center',gap:10}}>
                                 <Icon name='phone' color='white' size={20} />
                                 <Text style={{color:'white'}}>call</Text>

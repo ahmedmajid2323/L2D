@@ -7,6 +7,8 @@ import { Image, Text, View } from 'react-native'
 import ProfileClient from '../Screen/moniteur/home/ProfileClient'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import NewLesson from '../Screen/moniteur/home/NewLesson'
+import Agenda_client from '../Screen/moniteur/home/Agenda_client'
+import Chat_admin from '../Screen/moniteur/home/Chat_admin'
 
 const Tab = createBottomTabNavigator()
 
@@ -77,6 +79,8 @@ function Home_screen(){
   <Stack.Navigator screenOptions={{headerShown: false}} >
     <Stack.Screen name='home' component={Home} />
     <Stack.Screen name='profile' component={ProfileClient} />
+    <Stack.Screen name='chat' component={Chat_admin} />
+    <Stack.Screen name='client_agenda' component={Agenda_client} />
     <Stack.Screen name='new_lesson' component={NewLesson} />
   </Stack.Navigator>
   )

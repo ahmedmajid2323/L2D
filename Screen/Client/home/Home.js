@@ -85,7 +85,7 @@ const Home = ({navigation}) => {
           <View style={{flexDirection:'row',justifyContent:'space-evenly',gap:10}}>
             {
               categories.map((item , i)=>(
-                <Pressable onPress={()=>handleCategorie(i)}
+                <Pressable key={i} onPress={()=>handleCategorie(i)}
                 style={{backgroundColor: item.clicked ?'red' : 'white',padding:5,paddingHorizontal:8,borderRadius:20}} key={i}>
                   <Text style={{color:item.clicked ? 'white' :'#153A54',fontWeight:700}}>{item.name}</Text>
                 </Pressable>
