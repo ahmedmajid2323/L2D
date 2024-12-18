@@ -63,7 +63,11 @@ function Routes() {
                         .get()
                         .then(querySnapshot => {
                           querySnapshot.forEach(doc => {
-                            dispatch(setUser_credentiels(doc.data()))
+                            const client_data = {
+                              ...doc.data(),
+                              uid : doc.id
+                            }
+                            dispatch(setUser_credentiels(client_data))
                           });
                       });
                     }
